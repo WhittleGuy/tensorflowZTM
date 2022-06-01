@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import wget
+import matplotlib.pyplot as plt
 
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, Dense
@@ -13,15 +14,17 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Download the zip file of images
-wget.download(
-    'https://storage.googleapis.com/ztm_tf_course/food_vision/pizza_steak.zip')
-zip_ref = zipfile.ZipFile('pizza_steak.zip', 'r')
-zip_ref.extractall()
-zip_ref.close()
+# wget.download(
+#     'https://storage.googleapis.com/ztm_tf_course/food_vision/pizza_steak.zip')
+# zip_ref = zipfile.ZipFile('pizza_steak.zip', 'r')
+# zip_ref.extractall()
+# zip_ref.close()
 
 # Define directories
 train_dir = "pizza_steak/train"
 test_dir = "pizza_steak/test"
+
+# DATA GENERATION ##############################################################
 
 # Set up datagens
 train_datagen_augmented = ImageDataGenerator(rescale=1/255.,
@@ -47,6 +50,8 @@ test_data = test_datagen.flow_from_directory(test_dir,
                                              batch_size=32,
                                              class_mode='binary')
 
+# MODELING #####################################################################
+
 # Create a model
 model = Sequential([
     Conv2D(10, 3, activation='relu', input_shape=(224, 224, 3)),
@@ -69,6 +74,11 @@ history = model.fit(train_data,
                     epochs=1,
                     steps_per_epoch=len(train_data),
                     validation_data=test_data,
-                    validation_steps=len(test_data))
+                    validation_steps=len(test_data),
+                    )
 
+# SAVE MODEL ###################################################################
+pd.DataFrame(history.history).plot()
+plt.show()
+plt.savefig('loss')
 model.save('cnn_test_model.h5')
